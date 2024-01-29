@@ -1,0 +1,22 @@
+export const navLinks = [
+    {
+        id:1,
+        title:"Home",
+        redirectUrl:"/"
+    },
+    {
+        id:2,
+        title:"About",
+        redirectUrl:"/about"
+    },
+    {
+        id:3,
+        title:"Contact",
+        redirectUrl:"/contact"
+    },
+    {
+        id:4,
+        title:"Slams",
+        redirectUrl:"/slams"
+    },
+]
