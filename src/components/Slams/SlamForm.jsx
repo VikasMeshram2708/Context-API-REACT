@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function SlamForm() {
   const [userData, setUserData] = useState({
@@ -8,6 +8,8 @@ export default function SlamForm() {
     done: false,
   });
   const [slams, setSlams] = useState([]);
+  const [confirmEdit, setConfirmEdit] = useState(false);
+  const [editId, setEditId] = useState(null);
 
   const handleOnChange = (event) => {
     const { name, value } = event.target;
@@ -20,10 +22,14 @@ export default function SlamForm() {
   const handleSave = useCallback(
     (event) => {
       event.preventDefault();
-      console.log("user-data", userData);
 
-      if (!userData?.author) return toast.error("Author is required");
-      if (!userData?.message) return toast.error("Message is required");
+      if (!userData?.author) {
+        return toast.error("Author is required");
+      }
+
+      if (!userData?.message) {
+        return toast.error("Message is required");
+      }
 
       setSlams([
         ...slams,
@@ -35,16 +41,32 @@ export default function SlamForm() {
         },
       ]);
 
-      setUserData((prev) => ({
-        ...prev,
+      //   edit functionality implementation
+      if (confirmEdit) {
+        setSlams(
+          slams?.map((item) => {
+            if (item?.id === editId) {
+              return {
+                ...item,
+                name: userData?.author,
+                content: userData?.message,
+                done: userData?.done,
+              };
+            }
+            return item;
+          })
+        );
+      }
+
+      setUserData({
         author: "",
         message: "",
         done: "",
-      }));
+      });
 
       console.log("user-data", userData);
     },
-    [userData, slams]
+    [userData, slams, confirmEdit, editId]
   );
 
   const handleCheck = (slamId) => {
@@ -59,6 +81,21 @@ export default function SlamForm() {
         return item;
       })
     );
+  };
+
+  const handleEdit = (slamId) => {
+    setEditId(slamId);
+    setConfirmEdit((prev) => !prev);
+
+    let storedSlams = slams.find((item) => item?.id === slamId);
+    const { name, content, done } = storedSlams;
+    console.log("edidtables", storedSlams);
+    setUserData((prev) => ({
+      ...prev,
+      author: name,
+      message: content,
+      done: done,
+    }));
   };
 
   const handleDelete = (slamId) => {
@@ -115,7 +152,7 @@ export default function SlamForm() {
             type="submit"
             className="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           >
-            Add Slam
+            {confirmEdit ? "Confirm Edit" : "Add Slam"}
           </button>
         </div>
       </form>
@@ -147,10 +184,11 @@ export default function SlamForm() {
                 >
                   {item?.content}
                 </p>
-                <h1>{item?.name}</h1>
+                <h1 className="italic"> ~ {item?.name}</h1>
               </div>
               <div className="flex items-center gap-2">
                 <button
+                  onClick={() => handleEdit(item?.id)}
                   type="button"
                   className="bg-green-500 text-white font-semibold text-sm p-2 rounded-lg"
                 >
@@ -168,6 +206,7 @@ export default function SlamForm() {
           );
         })}
       </ul>
+      <Toaster />
     </section>
   );
 }
